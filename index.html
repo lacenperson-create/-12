@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>نادي البيئة والسلامة الصحية</title>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'></script>
+<link id='ic-apple' rel='apple-touch-icon' href=''>
+<link id='ic-fav' rel='icon' href=''>
+<link id='ic-man' rel='manifest' href=''>
 <style>
 :root{--p:#1b7f5b;--d:#0f5a40;--a:#f5a524;--bg:#f2f6f4;--c:#fff;--t:#1d2b24;--m:#6b7b73}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#101a15;--c:#1a2822;--t:#e7f1ec;--m:#9fb3a8}}
@@ -33,7 +37,9 @@ nav button.on{color:var(--p);font-weight:bold}
 .qr{width:70px;height:70px;background:#fff;color:#000;border-radius:6px;display:grid;place-items:center;font-size:11px;flex-shrink:0}
 .cnt{font-size:22px;font-weight:bold;color:var(--p);text-align:center;min-width:56px}
 .done{text-decoration:line-through;color:var(--m)}
+.bcn{background:linear-gradient(135deg,var(--p),var(--d));color:#fff;border-radius:16px;padding:16px}
 #rp-out{line-height:1.8}
+@media print{body *{visibility:hidden}#pa,#pa *{visibility:visible}#pa{position:absolute;top:0;left:0;width:100%}}
 .fl{display:block;margin:10px 0;font-size:14px}
 .fl input:not([type=checkbox]),.fl textarea,.fl select{width:100%;padding:9px;border:1px solid #0002;border-radius:10px;font:inherit;background:var(--bg);color:var(--t);margin-top:4px;display:block}
 .fl input[type=checkbox]{width:auto;margin-inline-end:6px}
@@ -46,16 +52,24 @@ nav button.on{color:var(--p);font-weight:bold}
 <body>
 <header>
   <h1 id="title">نادي البيئة والسلامة الصحية</h1>
+  <button id='back-btn' class='ghost sm hide' style='color:#fff;border-color:#fff' onclick='back()'>رجوع ›</button>
+  <button class="ghost sm" style="color:#fff;border-color:#fff" onclick="openSet()">⚙️</button>
   <button class="ghost sm" style="color:#fff;border-color:#fff" onclick="switchRole()" id="roleBtn">وضع المؤطر</button>
 </header>
 
 <main>
   <!-- ===== Vue التلميذ ===== -->
   <section id="s-home">
-    <div class="card"><div class="row"><b>مرحبا، سارة 👋</b><span class="badge">منخرطة</span></div>
-      <p class="tag">الموسم 2026/2027 · لجنة البيئة</p></div>
-    <div class='card row'><span>انخراط جديد؟</span><button class='sm' onclick='showJoin()'>استمارة الانخراط</button></div>
-    <h2>الرزنامة القادمة</h2>
+    <div class="card" style="display:none"><div class="row"><b id='me-hi'>مرحبا 👋</b></div>
+      <p class="tag">الموسم 2026/2027</p></div>
+    
+    
+    
+    
+    <div class='stats' style='margin-bottom:12px'><div><b id='h-m'>0</b>منخرط</div><div><b id='h-p'>0</b>مشروع</div><div><b id='h-a'>0</b>إنجاز</div><div><b id='h-t'>0%</b>إنجاز المهام</div></div>
+    <h2>إنجازات النادي</h2>
+    <div id='h-ach'></div>
+    <h2>مشاريع النادي</h2>
     <div id="s-acts"></div>
     <h2>بنك الأفكار</h2>
     <div class='card row'><input id='i-idea' placeholder='اقترح فكرة نشاط' style='flex:1;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t)'><button class='sm' onclick='addIdea()'>إضافة</button></div>
@@ -95,19 +109,64 @@ nav button.on{color:var(--p);font-weight:bold}
       <p class='tag' id='j-msg'></p>
     </div>
   </section>
+  <section id="s-set" class="hide">
+    <h2>الإعدادات</h2>
+    <div class='card'>
+      <label class='fl'>اسم النادي<input id='set-name'></label>
+      <label class='fl'>الشعار (إيموجي)<input id='set-logo' maxlength='2' placeholder='🌱'></label>
+      <div class='fl'>شعار النادي (صورة)<input type='file' accept='image/*' onchange='onLogo(this)' style='margin-top:6px'></div>
+      <div id='set-prev' style='margin-bottom:8px'></div>
+      <button class='ghost sm' onclick='removeLogo()' style='margin-bottom:8px'>حذف الصورة</button>
+      <div class='fl'>شعار الوزارة (صورة)<input type='file' accept='image/*' onchange='onMin(this)' style='margin-top:6px'></div>
+      <div id='set-prev2' style='margin-bottom:8px'></div>
+      <button class='ghost sm' onclick='removeMin()' style='margin-bottom:8px'>حذف شعار الوزارة</button>
+      <div class='fl'>لون النادي</div>
+      <div class='chips' style='grid-template-columns:repeat(4,1fr)'>
+        <label><input type='radio' name='set-c' value='#1b7f5b'>أخضر</label>
+        <label><input type='radio' name='set-c' value='#1f6fb2'>أزرق</label>
+        <label><input type='radio' name='set-c' value='#7a4bb5'>بنفسجي</label>
+        <label><input type='radio' name='set-c' value='#c2410c'>برتقالي</label>
+      </div>
+      <button style='width:100%' onclick='saveSet()'>حفظ</button>
+      <p class='tag' id='set-msg'></p>
+    </div>
+    <button class='ghost' style='width:100%' onclick='closeSet()'>رجوع</button>
+  </section>
+  <section id="s-mem" class="hide">
+    <h2>ملف المنخرط</h2>
+    <div class='card'><label class='fl'>اسمك الكامل<input id='me-in' oninput='setName(this.value)' placeholder='اكتب اسمك'></label></div>
+    <div class='card'><label class='fl'>القسم<input id='me-sec' oninput='setSec(this.value)' placeholder='مثال: ج'></label><label class='fl'>صورة المنخرط<input type='file' accept='image/*' onchange='onPhoto(this)' style='margin-top:6px'></label></div>
+    <button style='width:100%;margin-bottom:8px' onclick='showJoin()'>استمارة الانخراط (طلب جديد)</button>
+    <button class='ghost' style='width:100%' onclick='closeMem()'>رجوع</button>
+  </section>
   <section id="s-card" class="hide">
-    <div class="bc">
+    <div class='card row'><span>بيانات المنخرط (الاسم والقسم والصورة)</span><button class='sm' onclick='openMem()'>فتح</button></div>
+    <div class='bcn'>
+      <div class='row'><img id='cd-logo' style='height:48px;max-width:40%;object-fit:contain'><img id='cd-min' style='height:48px;max-width:40%;object-fit:contain'></div>
+      <div class='row' style='margin-top:12px;align-items:flex-start'>
+        <img id='cd-photo' style='width:80px;height:100px;object-fit:cover;border-radius:10px;background:#fff'>
+        <div style='flex:1;margin-inline:12px'>
+          <div style='font-size:12px;opacity:.85'>نادي البيئة والسلامة الصحية</div>
+          <div id='cd-name' style='font-size:19px;font-weight:bold;margin-top:4px'>اسمك هنا</div>
+          <div style='font-size:13px'>القسم: <span id='cd-sec'>—</span></div>
+          <div style='font-size:13px'>رقم التسلسل: <span id='cd-no'>—</span></div>
+          <div style='font-size:12px;opacity:.85'>الموسم 2026/2027</div>
+        </div>
+        <img id='cd-qr' style='width:84px;height:84px;background:#fff;border-radius:6px;padding:4px'>
+      </div>
+    </div>
+    <div class="bc" style="display:none">
       <div class="row">
         <div><div style="font-size:12px;opacity:.85">نادي البيئة والسلامة الصحية</div>
-          <div style="font-size:19px;font-weight:bold;margin-top:6px">سارة بنعلي</div>
-          <div style="font-size:13px">منخرطة · الثانية باك ج</div>
-          <div style="font-size:12px;opacity:.85;margin-top:8px">رقم الانخراط: 2026-014 · الموسم 2026/2027</div></div>
+          <div id='me-card' style="font-size:19px;font-weight:bold;margin-top:6px">اسمك هنا</div>
+          <div style="font-size:13px"></div>
+          <div style="font-size:12px;opacity:.85;margin-top:8px">الموسم 2026/2027</div></div>
         <div class="qr">QR</div>
       </div>
     </div>
-    <div class="row" style="margin-top:12px"><button>تحميل PNG</button><button class="ghost">تصدير PDF للطباعة</button></div>
+    <div class="row" style="margin-top:12px"><button onclick='cardPNG()'>تحميل PNG</button><button class='ghost' onclick='cardPrint()'>طباعة / حفظ PDF</button></div>
     <h2>الشارات</h2>
-    <div class="card row"><span>🌱 عضو نشيط</span><span class="tag">4 أنشطة</span></div>
+    <div class="card row"><span>الشارات تظهر هنا</span><span class="tag"></span></div>
   </section>
 
   <section id="s-tasks" class="hide">
@@ -125,6 +184,10 @@ nav button.on{color:var(--p);font-weight:bold}
     </div>
     <h2>طلبات الانخراط</h2>
     <div id="a-req"></div>
+    <h2>إضافة مشروع</h2>
+    <div class='card'><input id='p-t' placeholder='اسم المشروع' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><input id='p-d' type='date' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><button onclick='addProj()' style='width:100%'>إضافة المشروع</button></div>
+    <h2>إضافة إنجاز</h2>
+    <div class='card row'><input id='a-in' placeholder='وصف الإنجاز' style='flex:1;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t)'><button class='sm' onclick='addAch()'>إضافة</button></div>
     <h2>لوحة المهام حسب اللجنة</h2>
     <div id="a-tasks"></div>
     <h2>توليد التقارير</h2>
@@ -134,7 +197,9 @@ nav button.on{color:var(--p);font-weight:bold}
     </div>
     <div id="rp-out" class="card" contenteditable="true"></div>
     <h2>التقرير الحصيلة السنوي</h2>
-    <div class="card" id="annual-out"></div>
+    <div class="card"><select id="chart-type" onchange="annual()" style="width:100%;padding:8px;border-radius:10px;font:inherit;margin-bottom:8px;background:var(--bg);color:var(--t)"><option value="col">أعمدة</option><option value="bar">أشرطة أفقية</option><option value="pie">دائري</option></select><div id="annual-out"></div></div>
+    <h2>التقرير الشهري</h2>
+    <div class='card'><input type='month' id='mo-in' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:10px;display:block'><button onclick='genMonthly()' style='width:100%'>توليد التقرير الشهري في المحرر أعلاه</button></div>
     <h2>الشواهد التقديرية</h2>
     <div class='card'><select id='c-mem' onfocus='fillMembers()' style='width:100%;padding:8px;border-radius:10px;font:inherit;margin-bottom:10px'></select><div class='row'><button onclick='genCert()'>توليد الشهادة في المحرر أعلاه</button></div></div>
     <h2>سجل المعدات</h2>
@@ -152,18 +217,18 @@ nav button.on{color:var(--p);font-weight:bold}
 <script>
 const S={
   role:'s', tab:'home',
-  members:[{n:'سارة بنعلي',c:'لجنة البيئة'}],
-  requests:[{id:1,n:'يوسف الإدريسي',lvl:'الأولى إعدادي',coms:['الميدان','الورشات'],st:'pending'},
-            {id:2,n:'ليلى ختيمي',lvl:'الثانية إعدادي',coms:['الإعلام والتوثيق'],st:'pending'}],
+  members:[],
+  requests:[
+            ],
   acts:[
-    {t:'ورشة فرز النفايات',d:'2026-12-05',place:'ساحة المؤسسة',com:'البيئة',goal:'تحسيس التلاميذ بالفرز من المنبع'},
-    {t:'حملة النظافة الصحية',d:'2026-12-18',place:'الفناء الداخلي',com:'الصحة',goal:'نشر عادات غسل اليدين'},
-    {t:'معرض الملصقات البيئية',d:'2027-01-20',place:'قاعة الاجتماعات',com:'الإعلام',goal:'عرض أعمال التلاميذ'}],
+    
+    
+    ],
   tasks:[
-    {t:'تصميم ملصق المعرض',com:'الإعلام',done:true},
-    {t:'إعداد كلمة الافتتاح',com:'التنظيم',done:false},
-    {t:'تجهيز أكياس الفرز',com:'الورشات',done:false},
-    {t:'توثيق الحملة بالصور',com:'الإعلام',done:false}]
+    
+    
+    
+    ]
 };
 const days=d=>Math.max(0,Math.ceil((new Date(d)-new Date())/864e5));
 
@@ -176,11 +241,12 @@ function renderStudent(){
     <button class="sm ${t.done?'ghost':''}" onclick="toggleTask(${i})">${t.done?'تم':'إنجاز'}</button></div>`).join('');
 }
 function renderAdmin(){
+  renderHome();
   const done=S.tasks.filter(t=>t.done).length;
   document.getElementById('st-m').textContent=S.members.length;
   document.getElementById('st-r').textContent=S.requests.filter(r=>r.st==='pending').length;
   document.getElementById('st-a').textContent=S.acts.length;
-  document.getElementById('st-p').textContent=Math.round(done/S.tasks.length*100)+'%';
+  document.getElementById('st-p').textContent=(S.tasks.length?Math.round(done/S.tasks.length*100):0)+'%';
   const pend=S.requests.filter(r=>r.st==='pending');
   document.getElementById('a-req').innerHTML=pend.length?pend.map(r=>`
     <div class="card"><div class="row"><div><b>${r.n}</b><div class="tag">${r.lvl} · يرغب في: ${r.coms.join('، ')}</div></div>
@@ -201,6 +267,8 @@ function toggleTask(i){S.tasks[i].done=!S.tasks[i].done;renderStudent();}
 function go(tab){
   S.tab=tab;
   document.getElementById('s-join').classList.add('hide');
+  document.getElementById('s-set').classList.add('hide');
+  document.getElementById('s-mem').classList.add('hide');
   ['home','card','tasks'].forEach((t,i)=>{
     document.getElementById('n'+(i+1)).classList.toggle('on',t===tab);
     document.getElementById('s-'+t==='s-home'?'s-home':'s-'+t).classList.toggle('hide',t!==tab);
@@ -212,7 +280,7 @@ function switchRole(){
   document.getElementById('roleBtn').textContent=isA?'وضع التلميذ':'وضع المؤطر';
   document.getElementById('a-dash').classList.toggle('hide',!isA);
   document.querySelector('nav').classList.toggle('hide',isA);
-  ['s-home','s-card','s-tasks','s-join'].forEach(id=>document.getElementById(id).classList.add('hide'));
+  ['s-home','s-card','s-tasks','s-join','s-set','s-mem'].forEach(id=>document.getElementById(id).classList.add('hide'));
   if(!isA) go(S.tab);
   renderAdmin();
 }
@@ -221,7 +289,8 @@ function fillReports(){
 }
 function genReport(){
   const a=S.acts[+document.getElementById('rp-act').value];
-  document.getElementById('rp-out').innerHTML=`<h2>تقرير نشاط: ${a.t}</h2>
+  if(!a){document.getElementById('rp-out').innerHTML='<p>لا يوجد نشاط مسجل بعد.</p>';return;}
+  document.getElementById('rp-out').innerHTML=`${reportHead()}<h2>تقرير نشاط: ${a.t}</h2>
   <p><b>التاريخ:</b> ${a.d} · <b>المكان:</b> ${a.place} · <b>اللجنة المكلفة:</b> ${a.com}</p>
   <h3>الهدف التربوي</h3><p>${a.goal}</p>
   <h3>الحضور</h3><p>عدد المنخرطين المدعوين: ${S.members.length}</p>
@@ -234,7 +303,7 @@ function copyWord(){
     .then(()=>alert('تم النسخ، ألصقه في Word'))
     .catch(()=>alert('تعذر النسخ التلقائي، انسخ النص يدويًا'));
 }
-function annual(){
+function annualOld(){
   const coms=[...new Set(S.acts.map(a=>a.com))];
   const cnt=coms.map(c=>S.acts.filter(a=>a.com===c).length);
   const max=Math.max(...cnt,1), W=320/coms.length;
@@ -246,7 +315,7 @@ function annual(){
   document.getElementById('annual-out').innerHTML=`<div class="stats" style="margin-bottom:10px">
     <div><b>${S.acts.length}</b>نشاط</div><div><b>${S.members.length}</b>منخرط</div></div>
     <svg viewBox="0 0 340 195" width="100%"><line x1="10" y1="160" x2="330" y2="160" style="stroke:var(--m)"/>${bars}</svg>
-    <p class="tag">عدد الأنشطة حسب اللجنة · نسبة إنجاز المهام: ${Math.round(done/S.tasks.length*100)}%</p>`;
+    <p class="tag">عدد الأنشطة حسب اللجنة · نسبة إنجاز المهام: ${S.tasks.length?Math.round(done/S.tasks.length*100):0}%</p>`;
 }
 function showJoin(){
   go('home');
@@ -269,7 +338,7 @@ function submitJoin(){
   msg.textContent='تم إرسال طلبك وسيُراجَع من طرف المؤطر.';
   renderAdmin();
 }
-const IDEAS=[{t:'مسابقة أفضل صورة للبيئة',v:3},{t:'زيارة مطرح للنفايات',v:5}];
+const IDEAS=[];
 const EQ=[];
 function renderIdeas(){
   document.getElementById('s-ideas').innerHTML=[...IDEAS].sort((a,b)=>b.v-a.v).map(x=>`<div class='card row'><span>${x.t}</span><button class='sm ghost' onclick='vote(${IDEAS.indexOf(x)})'>👍 ${x.v}</button></div>`).join('');
@@ -281,8 +350,9 @@ function fillMembers(){
 }
 function genCert(){
   const m=S.members[+document.getElementById('c-mem').value];
+  if(!m){document.getElementById('rp-out').innerHTML='<p>لا يوجد منخرط مسجل بعد.</p>';return;}
   const d=new Date().toLocaleDateString('ar-MA');
-  document.getElementById('rp-out').innerHTML=`<div style='text-align:center;border:3px double var(--p);padding:30px'><h2>شهادة تقدير</h2><p>يشهد نادي البيئة والسلامة الصحية بأن</p><h1 style='color:var(--p)'>${m.n}</h1><p>قد ساهم بفعالية في أنشطة ${m.c}، الموسم 2026/2027</p><p style='margin-top:30px'>التاريخ: ${d} &nbsp;&nbsp;&nbsp; توقيع المؤطر: ………</p></div>`;
+  document.getElementById('rp-out').innerHTML=`<div style='text-align:center;border:3px double var(--p);padding:30px'>${logosHtml()}<h2>شهادة تقدير</h2><p>يشهد نادي البيئة والسلامة الصحية بأن</p><h1 style='color:var(--p)'>${m.n}</h1><p>قد ساهم بفعالية في أنشطة ${m.c}، الموسم 2026/2027</p><p style='margin-top:30px'>التاريخ: ${d} &nbsp;&nbsp;&nbsp; توقيع المؤطر: ………</p></div>`;
   document.getElementById('rp-out').scrollIntoView({behavior:'smooth'});
 }
 function lendEq(){
@@ -294,7 +364,318 @@ function retEq(i){EQ[i].st='مُعادة';renderEq();}
 function renderEq(){
   document.getElementById('eq-list').innerHTML=EQ.map((e,i)=>`<div class='card row'><div><b>${e.t}</b><div class='tag'>${e.to} · ${e.st}</div></div>${e.st==='مُعادة'?'':`<button class='sm ghost' onclick='retEq(${i})'>استرجاع</button>`}</div>`).join('')||`<div class='card tag'>لا توجد معدات مسجلة</div>`;
 }
-renderStudent();renderAdmin();go('home');fillReports();annual();renderIdeas();fillMembers();renderEq();
+function setName(v){
+  S.me=v.trim();
+  try{localStorage.setItem('nadi-me',S.me)}catch(e){}
+  renderMe();
+}
+const PROF={sec:'',photo:''};
+try{Object.assign(PROF,JSON.parse(localStorage.getItem('nadi-prof')||'{}'))}catch(e){}
+function renderMe(){
+  renderCard();
+  document.getElementById('me-hi').textContent=S.me?'مرحبا، '+S.me+' 👋':'مرحبا 👋';
+  document.getElementById('me-card').textContent=S.me||'اسمك هنا';
+}
+S.me=(()=>{try{return localStorage.getItem('nadi-me')||''}catch(e){return ''}})();
+document.getElementById('me-in').value=S.me;
+renderMe();
+const SET={name:'نادي البيئة والسلامة الصحية',logo:'🌱',color:'#1b7f5b'};
+try{Object.assign(SET,JSON.parse(localStorage.getItem('nadi-set')||'{}'))}catch(e){}
+function applySet(){
+  const t=document.getElementById('title');
+  t.textContent=SET.name;
+  if(SET.img){const i=document.createElement('img');i.src=SET.img;i.style.cssText='width:26px;height:26px;border-radius:6px;margin-inline-end:6px;vertical-align:middle;object-fit:contain;background:#fff';t.prepend(i);}
+  else t.textContent=SET.logo+' '+SET.name;
+  const d=document.documentElement.style;
+  d.setProperty('--p',SET.color); d.setProperty('--d',SET.color);
+  updateIcons();
+}
+function openSet(){
+  ['s-home','s-card','s-tasks','s-join','a-dash'].forEach(id=>document.getElementById(id).classList.add('hide'));
+  document.getElementById('s-set').classList.remove('hide');
+  document.querySelector('nav').classList.add('hide');
+  document.getElementById('set-name').value=SET.name;
+  preview();
+  document.getElementById('set-logo').value=SET.logo;
+  document.querySelectorAll('input[name=set-c]').forEach(r=>r.checked=r.value===SET.color);
+  window.scrollTo(0,0);
+}
+function persist(){try{localStorage.setItem('nadi-set',JSON.stringify(SET))}catch(e){}}
+function preview(){
+  prev2();
+  document.getElementById('set-prev').innerHTML=SET.img?`<img src='${SET.img}' style='width:64px;height:64px;border-radius:12px;object-fit:contain;background:#fff'>`:'';
+}
+function onLogo(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const im=new Image();
+    im.onload=()=>{
+      const c=document.createElement('canvas'); c.width=c.height=128;
+      const s=Math.min(im.width,im.height);
+      c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,128,128);
+      SET.img=c.toDataURL('image/png'); persist(); applySet(); preview();
+    };
+    im.src=r.result;
+  };
+  r.readAsDataURL(f);
+}
+function removeLogo(){SET.img='';persist();applySet();preview();}
+function resizeImg(file,cb){
+  const r=new FileReader();
+  r.onload=()=>{
+    const im=new Image();
+    im.onload=()=>{
+      const k=Math.min(1,256/im.width);
+      const c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      cb(c.toDataURL('image/png'));
+    };
+    im.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+function onMin(input){
+  const f=input.files[0]; if(!f) return;
+  resizeImg(f,d=>{SET.minImg=d; persist(); preview();});
+}
+function removeMin(){SET.minImg='';persist();preview();}
+function prev2(){
+  document.getElementById('set-prev2').innerHTML=SET.minImg?`<img src='${SET.minImg}' style='height:56px;object-fit:contain;background:#fff;border-radius:8px'>`:'';
+}
+function genMonthly(){
+  const m=document.getElementById('mo-in').value;
+  if(!m){document.getElementById('rp-out').innerHTML='<p>اختر الشهر أولاً.</p>';return;}
+  const acts=S.acts.filter(a=>a.d&&a.d.slice(0,7)===m);
+  const coms=[...new Set(acts.map(a=>a.com))];
+  const done=S.tasks.filter(t=>t.done).length;
+  const label=new Date(m+'-01').toLocaleDateString('ar-MA',{year:'numeric',month:'long'});
+  const list=acts.length?`<ul>${acts.map(a=>`<li>${a.d} — ${a.t}${a.place?' ('+a.place+')':''} · ${a.com}</li>`).join('')}</ul>`:"<p>لا توجد أنشطة مسجلة في هذا الشهر.</p>";
+  const bars=coms.map(c=>{const n=acts.filter(a=>a.com===c).length; const p=Math.round(n/acts.length*100); return `<div style='margin:6px 0'><div class='row'><span>${c}</span><span class='tag'>${n}</span></div><div class='bar'><i style='width:${p}%'></i></div></div>`;}).join('');
+  document.getElementById('rp-out').innerHTML=`${reportHead()}<h2>التقرير الشهري: ${label}</h2>
+  <div class='stats' style='margin-bottom:12px'><div><b>${acts.length}</b>نشاط</div><div><b>${coms.length}</b>لجنة نشطة</div><div><b>${S.members.length}</b>منخرط</div><div><b>${S.tasks.length?Math.round(done/S.tasks.length*100):0}%</b>إنجاز المهام</div></div>
+  <h3>الأنشطة</h3>${list}
+  <h3>توزيع الأنشطة حسب اللجنة</h3>${bars||'<p>—</p>'}
+  <h3>ملاحظات</h3><p>……</p>`;
+  document.getElementById('rp-out').scrollIntoView({behavior:'smooth'});
+}
+function reportHead(){
+  const l=logosHtml();
+  return l?`<div style='text-align:center;margin-bottom:10px'>${l}</div>`:'';
+}
+function logosHtml(){
+  return [SET.img,SET.minImg].filter(Boolean).map(s=>`<img src='${s}' style='height:70px;max-width:45%;object-fit:contain;margin:0 8px'>`).join('');
+}
+function openMem(){
+  ['s-home','s-card','s-tasks','s-join','s-set','a-dash'].forEach(id=>document.getElementById(id).classList.add('hide'));
+  document.getElementById('s-mem').classList.remove('hide');
+  document.querySelector('nav').classList.add('hide');
+  window.scrollTo(0,0);
+}
+function closeMem(){
+  document.getElementById('s-mem').classList.add('hide');
+  document.querySelector('nav').classList.toggle('hide',S.role==='a');
+  if(S.role==='a') document.getElementById('a-dash').classList.remove('hide'); else go(S.tab);
+}
+const ACH=[];
+function addAch(){const el=document.getElementById('a-in');const t=el.value.trim();if(!t)return;ACH.push(t);el.value='';renderHome();}
+function addProj(){
+  const t=document.getElementById('p-t').value.trim(), d=document.getElementById('p-d').value;
+  if(!t||!d) return;
+  S.acts.push({t,d,place:'',com:'عام',goal:''});
+  document.getElementById('p-t').value=''; document.getElementById('p-d').value='';
+  renderStudent(); fillReports(); annual(); renderAdmin();
+}
+function renderHome(){
+  const done=S.tasks.filter(t=>t.done).length;
+  document.getElementById('h-m').textContent=S.members.length;
+  document.getElementById('h-p').textContent=S.acts.length;
+  document.getElementById('h-a').textContent=ACH.length;
+  document.getElementById('h-t').textContent=(S.tasks.length?Math.round(done/S.tasks.length*100):0)+'%';
+  document.getElementById('h-ach').innerHTML=ACH.map(x=>`<div class='card'>🏆 ${x}</div>`).join('')||"<div class='card tag'>لا توجد إنجازات بعد</div>";
+}
+function iconSrc(){
+  if(SET.img) return SET.img;
+  const c=document.createElement('canvas'); c.width=c.height=512;
+  const x=c.getContext('2d');
+  x.fillStyle=SET.color; x.fillRect(0,0,512,512);
+  x.font='300px serif'; x.textAlign='center'; x.textBaseline='middle';
+  x.fillText(SET.logo,256,270);
+  return c.toDataURL('image/png');
+}
+function updateIcons(){
+  const src=iconSrc();
+  document.getElementById('ic-apple').href=src;
+  document.getElementById('ic-fav').href=src;
+  const m={name:SET.name,short_name:SET.name.slice(0,12),start_url:location.href.split('#')[0],display:'standalone',background_color:SET.color,theme_color:SET.color,icons:[{src,sizes:'any',type:'image/png'}]};
+  document.getElementById('ic-man').href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+}
+function closeSet(){
+  document.getElementById('s-set').classList.add('hide');
+  document.querySelector('nav').classList.toggle('hide',S.role==='a');
+  if(S.role==='a') document.getElementById('a-dash').classList.remove('hide'); else go(S.tab);
+}
+function saveSet(){
+  SET.name=document.getElementById('set-name').value.trim()||SET.name;
+  SET.logo=document.getElementById('set-logo').value.trim()||SET.logo;
+  const c=document.querySelector('input[name=set-c]:checked'); if(c) SET.color=c.value;
+  try{localStorage.setItem('nadi-set',JSON.stringify(SET))}catch(e){}
+  applySet();
+  document.getElementById('set-msg').textContent='تم الحفظ';
+}
+applySet();
+function annual(){
+  const out=document.getElementById('annual-out');
+  const type=document.getElementById('chart-type').value;
+  const coms=[...new Set(S.acts.map(a=>a.com))];
+  const cnt=coms.map(c=>S.acts.filter(a=>a.com===c).length);
+  const done=S.tasks.filter(t=>t.done).length;
+  const summary=`<div class='stats' style='margin-bottom:10px'><div><b>${S.acts.length}</b>نشاط</div><div><b>${S.members.length}</b>منخرط</div></div>`;
+  const foot=`<p class='tag'>عدد الأنشطة حسب اللجنة · نسبة إنجاز المهام: ${S.tasks.length?Math.round(done/S.tasks.length*100):0}%</p>`;
+  if(!coms.length){out.innerHTML=summary+"<p class='tag'>لا توجد أنشطة لعرضها بعد.</p>"+foot;return;}
+  const colors=['#1b7f5b','#1f6fb2','#f5a524','#7a4bb5','#c2410c','#0f766e','#be185d'];
+  let svg='';
+  if(type==='pie'){
+    const total=cnt.reduce((a,b)=>a+b,0); let ang=-Math.PI/2; const cx=110,cy=110,R=100;
+    svg=`<svg viewBox='0 0 340 230' width='100%'>`;
+    coms.forEach((c,i)=>{
+      const col=colors[i%colors.length];
+      if(coms.length===1){svg+=`<circle cx='${cx}' cy='${cy}' r='${R}' fill='${col}'/>`;}
+      else{
+        const sweep=cnt[i]/total*2*Math.PI;
+        const x1=cx+R*Math.cos(ang), y1=cy+R*Math.sin(ang);
+        ang+=sweep;
+        const x2=cx+R*Math.cos(ang), y2=cy+R*Math.sin(ang);
+        svg+=`<path d='M${cx},${cy} L${x1},${y1} A${R},${R} 0 ${sweep>Math.PI?1:0} 1 ${x2},${y2} Z' fill='${col}'/>`;
+      }
+      svg+=`<rect x='230' y='${20+i*24}' width='12' height='12' fill='${col}'/><text x='248' y='${31+i*24}' style='fill:var(--t);font-size:12px'>${c} (${cnt[i]})</text>`;
+    });
+    svg+='</svg>';
+  } else if(type==='bar'){
+    const max=Math.max(...cnt,1);
+    svg=`<svg viewBox='0 0 340 ${40+coms.length*40}' width='100%'>`+coms.map((c,i)=>{const w=cnt[i]/max*220, y=20+i*40; return `<text x='0' y='${y+12}' style='fill:var(--t);font-size:12px'>${c}</text><rect x='0' y='${y+18}' width='${w}' height='14' rx='4' fill='${colors[i%colors.length]}'/><text x='${w+6}' y='${y+30}' style='fill:var(--t);font-size:12px'>${cnt[i]}</text>`;}).join('')+'</svg>';
+  } else {
+    const max=Math.max(...cnt,1), W=320/coms.length;
+    svg=`<svg viewBox='0 0 340 195' width='100%'><line x1='10' y1='160' x2='330' y2='160' style='stroke:var(--m)'/>`+coms.map((c,i)=>{const h=cnt[i]/max*130, x=20+i*W+W*.2; return `<rect x='${x}' y='${160-h}' width='${W*.6}' height='${h}' rx='4' fill='${colors[i%colors.length]}'/><text x='${x+W*.3}' y='${154-h}' text-anchor='middle' style='fill:var(--t);font-size:12px'>${cnt[i]}</text><text x='${x+W*.3}' y='182' text-anchor='middle' style='fill:var(--m);font-size:11px'>${c}</text>`;}).join('')+'</svg>';
+  }
+  out.innerHTML=reportHead()+summary+svg+foot;
+}
+function memberNo(){
+  let h=0; for(const ch of (S.me||'')) h=(h*31+ch.charCodeAt(0))%1000000;
+  return '2026-'+String(h).padStart(6,'0');
+}
+function loadImg(src){
+  return new Promise(res=>{ if(!src) return res(null); const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; });
+}
+async function cardCanvasOld(){
+  const W=856,H=540;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,SET.color); g.addColorStop(1,'#0f5a40');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  const [a,b]=await Promise.all([loadImg(SET.img),loadImg(SET.minImg)]);
+  if(a) x.drawImage(a,50,40,90,90);
+  if(b){const s=Math.min(110/b.width,90/b.height); x.drawImage(b,160,40,b.width*s,b.height*s);}
+  x.fillStyle='#fff'; x.textAlign='right';
+  x.font='bold 40px Tahoma,sans-serif'; x.fillText(SET.name,W-50,100);
+  x.font='26px Tahoma,sans-serif'; x.fillText('بطاقة منخرط · الموسم 2026/2027',W-50,150);
+  x.font='bold 56px Tahoma,sans-serif'; x.fillText(S.me||'اسمك هنا',W-50,300);
+  x.font='28px Tahoma,sans-serif'; x.fillText('رقم الانخراط: '+memberNo(),W-50,360);
+  x.fillStyle='#fff'; x.fillRect(50,H-190,150,150);
+  x.fillStyle='#000'; x.textAlign='center'; x.font='20px Tahoma,sans-serif'; x.fillText('QR',125,H-105);
+  return c;
+}
+async function cardPNG(){
+  const c=await cardCanvas();
+  const l=document.createElement('a'); l.download='bitaqat-muntasib.png'; l.href=c.toDataURL('image/png');
+  document.body.appendChild(l); l.click(); l.remove();
+}
+async function cardPrint(){
+  const c=await cardCanvas();
+  const d=document.createElement('div'); d.id='pa';
+  d.innerHTML=`<img src='${c.toDataURL('image/png')}' style='width:100%'>`;
+  document.body.appendChild(d);
+  window.print();
+  setTimeout(()=>d.remove(),1000);
+}
+function saveProf(){try{localStorage.setItem('nadi-prof',JSON.stringify(PROF))}catch(e){}}
+function setSec(v){PROF.sec=v.trim();saveProf();renderCard();}
+function onPhoto(input){
+  const f=input.files[0]; if(!f) return;
+  resizeImg(f,d=>{PROF.photo=d; saveProf(); renderCard();});
+}
+function setImg(id,src){
+  const e=document.getElementById(id);
+  if(src){e.src=src; e.style.display='';} else {e.removeAttribute('src'); e.style.display='none';}
+}
+function renderCard(){
+  if(!document.getElementById('cd-name')) return;
+  document.getElementById('cd-name').textContent=S.me||'اسمك هنا';
+  document.getElementById('cd-sec').textContent=PROF.sec||'—';
+  document.getElementById('cd-no').textContent=memberNo();
+  setImg('cd-logo',SET.img); setImg('cd-min',SET.minImg); setImg('cd-photo',PROF.photo);
+  if(typeof qrcode==='function'){
+    const q=qrcode(0,'M');
+    q.addData(`${SET.name}|${memberNo()}|${S.me||''}|${PROF.sec||''}`);
+    q.make();
+    document.getElementById('cd-qr').src=q.createDataURL(4,0);
+  }
+}
+async function cardCanvas(){
+  const W=856,H=540;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,SET.color); g.addColorStop(1,'#0f5a40');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  const [a,b,p,q]=await Promise.all([loadImg(SET.img),loadImg(SET.minImg),loadImg(PROF.photo),loadImg(document.getElementById('cd-qr').src)]);
+  if(a) x.drawImage(a,40,30,80,80);
+  if(b){const s=Math.min(120/b.width,80/b.height); x.drawImage(b,135,30,b.width*s,b.height*s);}
+  if(p){x.fillStyle='#fff'; x.fillRect(40,150,160,200); x.drawImage(p,44,154,152,192);}
+  x.fillStyle='#fff'; x.textAlign='right';
+  x.font='bold 30px Tahoma,sans-serif'; x.fillText(SET.name,W-40,100);
+  x.font='24px Tahoma,sans-serif'; x.fillText('بطاقة منخرط · الموسم 2026/2027',W-40,150);
+  x.font='bold 46px Tahoma,sans-serif'; x.fillText(S.me||'اسمك هنا',W-40,250);
+  x.font='26px Tahoma,sans-serif';
+  x.fillText('القسم: '+(PROF.sec||'—'),W-40,300);
+  x.fillText('رقم التسلسل: '+memberNo(),W-40,345);
+  if(q){x.fillStyle='#fff'; x.fillRect(W-240,H-240,200,200); x.drawImage(q,W-230,H-230,180,180);}
+  return c;
+}
+const SCREENS=['s-home','s-card','s-tasks','s-join','s-set','s-mem','a-dash'];
+const HIST=[];
+const TABS={'s-home':'n1','s-card':'n2','s-tasks':'n3'};
+function curScreen(){return SCREENS.find(id=>!document.getElementById(id).classList.contains('hide'))||'s-home';}
+function showOnly(id){
+  SCREENS.forEach(s=>document.getElementById(s).classList.toggle('hide',s!==id));
+  document.querySelector('nav').classList.toggle('hide',!TABS[id]);
+  Object.entries(TABS).forEach(([s,b])=>document.getElementById(b).classList.toggle('on',s===id));
+  document.getElementById('back-btn').classList.toggle('hide',id==='s-home'||id==='a-dash');
+  window.scrollTo(0,0);
+}
+function nav(id){const c=curScreen(); if(c!==id) HIST.push(c); showOnly(id);}
+function back(){const p=HIST.pop(); showOnly(p||(S.role==='a'?'a-dash':'s-'+S.tab));}
+function go(tab){S.tab=tab; HIST.length=0; showOnly('s-'+tab);}
+function openSet(){
+  nav('s-set');
+  document.getElementById('set-name').value=SET.name;
+  document.getElementById('set-logo').value=SET.logo;
+  document.querySelectorAll('input[name=set-c]').forEach(r=>r.checked=r.value===SET.color);
+  preview();
+}
+function closeSet(){back();}
+function openMem(){nav('s-mem');}
+function closeMem(){back();}
+function showJoin(){nav('s-join');}
+function switchRole(){
+  S.role=S.role==='s'?'a':'s'; HIST.length=0;
+  document.getElementById('roleBtn').textContent=S.role==='a'?'وضع التلميذ':'وضع المؤطر';
+  renderAdmin();
+  if(S.role==='a') showOnly('a-dash'); else go(S.tab);
+}
+document.getElementById('mo-in').value=new Date().toISOString().slice(0,7);
+const ib=document.getElementById('i-idea').parentElement;
+document.getElementById('s-tasks').append(ib.previousElementSibling,ib,document.getElementById('s-ideas'));
+renderStudent();renderAdmin();go('home');fillReports();annual();renderIdeas();fillMembers();renderEq();document.getElementById('me-sec').value=PROF.sec;renderCard();
 </script>
 </body>
 </html>
