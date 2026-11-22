@@ -132,6 +132,7 @@ nav button.on{color:var(--p);font-weight:bold}
       <button style='width:100%' onclick='saveSet()'>حفظ</button>
       <p class='tag' id='set-msg'></p>
     </div>
+    <div class='card'><b>تثبيت التطبيق على الهاتف</b><p class='tag'>على Android: اضغط زر التثبيت أدناه.<br>على iPhone: من Safari اضغط زر المشاركة ثم "إضافة إلى الشاشة الرئيسية".</p><button id='inst-btn' onclick='installApp()' style='width:100%'>تثبيت التطبيق</button><p class='tag' id='inst-msg'></p></div>
     <button class='ghost' style='width:100%' onclick='closeSet()'>رجوع</button>
   </section>
   <section id="s-mem" class="hide">
@@ -470,6 +471,21 @@ function renderTeam(){
   document.getElementById('h-team').innerHTML=html||"<div class='card tag'>لم تُضف أعضاء التسيير بعد</div>";
   document.getElementById('t-list').innerHTML=TEAM.map((m,i)=>`<div class='card row'><span>${m.n} <span class='tag'>(${m.r})</span></span><button class='sm ghost' onclick='removeTeam(${i})'>حذف</button></div>`).join('');
 }
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+function installApp(){
+  const msg=document.getElementById('inst-msg');
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(c=>{
+      msg.textContent=c.outcome==='accepted'?'تم التثبيت':'تم إلغاء التثبيت';
+      deferredPrompt=null;
+    });
+    return;
+  }
+  msg.textContent='إن لم يظهر زر التثبيت: من قائمة المتصفح اختر "إضافة إلى الشاشة الرئيسية" أو "تثبيت التطبيق".';
+}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 function genMonthly(){
   const m=document.getElementById('mo-in').value;
   if(!m){document.getElementById('rp-out').innerHTML='<p>اختر الشهر أولاً.</p>';return;}
