@@ -384,7 +384,6 @@ function renderMe(){
 }
 S.me=(()=>{try{return localStorage.getItem('nadi-me')||''}catch(e){return ''}})();
 document.getElementById('me-in').value=S.me;
-renderMe();
 const SET={name:'نادي البيئة والسلامة الصحية',logo:'🌱',color:'#1b7f5b'};
 try{Object.assign(SET,JSON.parse(localStorage.getItem('nadi-set')||'{}'))}catch(e){}
 function applySet(){
@@ -719,7 +718,7 @@ document.getElementById('mo-in').value=new Date().toISOString().slice(0,7);
 renderTeam();
 const ib=document.getElementById('i-idea').parentElement;
 document.getElementById('s-tasks').append(ib.previousElementSibling,ib,document.getElementById('s-ideas'));
-renderStudent();renderAdmin();go('home');fillReports();annual();renderIdeas();fillMembers();renderEq();document.getElementById('me-sec').value=PROF.sec;renderCard();
+renderStudent();renderAdmin();go('home');fillReports();annual();renderIdeas();fillMembers();renderEq();document.getElementById('me-sec').value=PROF.sec;renderCard();renderMe();
 </script>
 </body>
 </html>
