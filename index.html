@@ -37,7 +37,7 @@ nav button.on{color:var(--p);font-weight:bold}
 .qr{width:70px;height:70px;background:#fff;color:#000;border-radius:6px;display:grid;place-items:center;font-size:11px;flex-shrink:0}
 .cnt{font-size:22px;font-weight:bold;color:var(--p);text-align:center;min-width:56px}
 .done{text-decoration:line-through;color:var(--m)}
-.bcn{background:linear-gradient(135deg,var(--p),var(--d));color:#fff;border-radius:16px;padding:16px}
+.bcn{background:#fff;color:#1d2b24;border-radius:16px;padding:16px;border:2px solid var(--p)}
 #rp-out{line-height:1.8}
 @media print{body *{visibility:hidden}#pa,#pa *{visibility:visible}#pa{position:absolute;top:0;left:0;width:100%}}
 .fl{display:block;margin:10px 0;font-size:14px}
@@ -485,6 +485,47 @@ function installApp(){
   msg.textContent='إن لم يظهر زر التثبيت: من قائمة المتصفح اختر "إضافة إلى الشاشة الرئيسية" أو "تثبيت التطبيق".';
 }
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+async function cardCanvasV2(){
+  const W=856,H=540;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,SET.color); g.addColorStop(1,'#0f5a40');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  const [a,b,p,q]=await Promise.all([loadImg(SET.img),loadImg(SET.minImg),loadImg(PROF.photo),loadImg(document.getElementById('cd-qr').src)]);
+  if(a) x.drawImage(a,40,30,80,80);
+  if(b){const s=Math.min(120/b.width,80/b.height); x.drawImage(b,135,30,b.width*s,b.height*s);}
+  if(SET.img){x.save(); x.globalAlpha=0.12; const cw=SET.img; const w=520, h=420; const k=Math.min(w/a.width,h/a.height); if(a) x.drawImage(a,(W-a.width*k)/2,(H-a.height*k)/2,a.width*k,a.height*k); x.restore();}
+  if(p){x.fillStyle='#fff'; x.fillRect(38,148,164,204); x.drawImage(p,42,152,156,196);}
+  if(q){x.fillStyle='#fff'; x.fillRect(38,370,150,150); x.drawImage(q,44,376,138,138);}
+  x.fillStyle='#fff'; x.textAlign='right';
+  x.font='bold 30px Tahoma,sans-serif'; x.fillText(SET.name,W-40,110);
+  x.font='24px Tahoma,sans-serif'; x.fillText('بطاقة منخرط · الموسم 2026/2027',W-40,156);
+  x.font='bold 46px Tahoma,sans-serif'; x.fillText(S.me||'اسمك هنا',W-40,250);
+  x.font='26px Tahoma,sans-serif';
+  x.fillText('القسم: ⁦'+(PROF.sec||'—')+'⁩',W-40,310);
+  x.fillText('رقم التسلسل: ⁦'+memberNo()+'⁩',W-40,360);
+  return c;
+}
+async function cardCanvas(){
+  const W=856,H=540;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle='#ffffff'; x.fillRect(0,0,W,H);
+  x.strokeStyle=SET.color; x.lineWidth=10; x.strokeRect(5,5,W-10,H-10);
+  const [a,p,q]=await Promise.all([loadImg(SET.img),loadImg(PROF.photo),loadImg(document.getElementById('cd-qr').src)]);
+  if(a){x.save(); x.globalAlpha=0.1; const k=Math.min(520/a.width,420/a.height); x.drawImage(a,(W-a.width*k)/2,(H-a.height*k)/2,a.width*k,a.height*k); x.restore();}
+  if(a) x.drawImage(a,40,30,80,80);
+  if(p){x.strokeStyle=SET.color; x.lineWidth=4; x.strokeRect(38,148,164,204); x.drawImage(p,42,152,156,196);}
+  if(q){x.drawImage(q,44,376,138,138);}
+  x.textAlign='right';
+  x.fillStyle=SET.color; x.font='bold 30px Tahoma,sans-serif'; x.fillText(SET.name,W-40,110);
+  x.fillStyle='#4b5b53'; x.font='24px Tahoma,sans-serif'; x.fillText('بطاقة منخرط · الموسم 2026/2027',W-40,156);
+  x.fillStyle='#1d2b24'; x.font='bold 46px Tahoma,sans-serif'; x.fillText(S.me||'اسمك هنا',W-40,250);
+  x.font='26px Tahoma,sans-serif';
+  x.fillText('القسم: ⁦'+(PROF.sec||'—')+'⁩',W-40,310);
+  x.fillText('رقم التسلسل: ⁦'+memberNo()+'⁩',W-40,360);
+  return c;
+}
 function genMonthly(){
   const m=document.getElementById('mo-in').value;
   if(!m){document.getElementById('rp-out').innerHTML='<p>اختر الشهر أولاً.</p>';return;}
@@ -652,10 +693,12 @@ function setImg(id,src){
 }
 function renderCard(){
   if(!document.getElementById('cd-name')) return;
+  const bc=document.querySelector('.bcn');
+  if(bc){bc.style.backgroundImage=SET.img?`linear-gradient(rgba(255,255,255,.92),rgba(255,255,255,.92)),url(${SET.img})`:'';bc.style.backgroundSize='cover, 55%';bc.style.backgroundPosition='center, center';bc.style.backgroundRepeat='no-repeat';}
   document.getElementById('cd-name').textContent=S.me||'اسمك هنا';
   document.getElementById('cd-sec').textContent=PROF.sec||'—';
   document.getElementById('cd-no').textContent=memberNo();
-  setImg('cd-logo',SET.img); setImg('cd-min',SET.minImg); setImg('cd-photo',PROF.photo);
+  setImg('cd-logo',SET.img); setImg('cd-min',''); setImg('cd-photo',PROF.photo);
   if(typeof qrcode==='function'){
     const q=qrcode(0,'M');
     q.addData(`${SET.name}|${memberNo()}|${S.me||''}|${PROF.sec||''}`);
@@ -663,7 +706,7 @@ function renderCard(){
     document.getElementById('cd-qr').src=q.createDataURL(4,0);
   }
 }
-async function cardCanvas(){
+async function cardCanvasV1(){
   const W=856,H=540;
   const c=document.createElement('canvas'); c.width=W; c.height=H;
   const x=c.getContext('2d');
