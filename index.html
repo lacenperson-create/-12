@@ -147,7 +147,7 @@ nav button.on{color:var(--p);font-weight:bold}
     <div class='bcn'>
       <div class='row'><img id='cd-logo' style='height:48px;max-width:40%;object-fit:contain'><img id='cd-min' style='height:48px;max-width:40%;object-fit:contain'></div>
       <div class='row' style='margin-top:12px;align-items:flex-start'>
-        <img id='cd-photo' style='width:80px;height:100px;object-fit:cover;border-radius:10px;background:#fff'>
+        <img id='cd-photo' style='width:150px;height:185px;object-fit:cover;border-radius:10px;background:#fff'>
         <div style='flex:1;margin-inline:12px'>
           <div style='font-size:12px;opacity:.85'>نادي البيئة والسلامة الصحية</div>
           <div id='cd-name' style='font-size:19px;font-weight:bold;margin-top:4px'>اسمك هنا</div>
@@ -515,8 +515,8 @@ async function cardCanvas(){
   const [a,p,q]=await Promise.all([loadImg(SET.img),loadImg(PROF.photo),loadImg(document.getElementById('cd-qr').src)]);
   if(a){x.save(); x.globalAlpha=0.1; const k=Math.min(520/a.width,420/a.height); x.drawImage(a,(W-a.width*k)/2,(H-a.height*k)/2,a.width*k,a.height*k); x.restore();}
   if(a) x.drawImage(a,40,30,80,80);
-  if(p){x.strokeStyle=SET.color; x.lineWidth=4; x.strokeRect(38,148,164,204); x.drawImage(p,42,152,156,196);}
-  if(q){x.drawImage(q,44,376,138,138);}
+  if(p){x.strokeStyle=SET.color; x.lineWidth=4; x.strokeRect(36,136,248,308); x.drawImage(p,40,140,240,300);}
+  if(q){x.drawImage(q,686,380,130,130);}
   x.textAlign='right';
   x.fillStyle=SET.color; x.font='bold 30px Tahoma,sans-serif'; x.fillText(SET.name,W-40,110);
   x.fillStyle='#4b5b53'; x.font='24px Tahoma,sans-serif'; x.fillText('بطاقة منخرط · الموسم 2026/2027',W-40,156);
