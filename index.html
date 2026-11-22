@@ -66,6 +66,8 @@ nav button.on{color:var(--p);font-weight:bold}
     
     
     
+    <h2>أعضاء تسيير النادي</h2>
+    <div id='h-team'></div>
     <div class='stats' style='margin-bottom:12px'><div><b id='h-m'>0</b>منخرط</div><div><b id='h-p'>0</b>مشروع</div><div><b id='h-a'>0</b>إنجاز</div><div><b id='h-t'>0%</b>إنجاز المهام</div></div>
     <h2>إنجازات النادي</h2>
     <div id='h-ach'></div>
@@ -184,6 +186,9 @@ nav button.on{color:var(--p);font-weight:bold}
     </div>
     <h2>طلبات الانخراط</h2>
     <div id="a-req"></div>
+    <h2>تسيير النادي</h2>
+    <div class='card'><input id='t-n' placeholder='الاسم الكامل' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><select id='t-r' style='width:100%;padding:8px;border-radius:10px;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><option>رئيس النادي</option><option>نائب الرئيس</option><option>الكاتب العام</option><option>أمين المال</option><option>عضو مكتب</option><option>مؤطر</option><option>مؤطر مساعد</option><option>رئيس لجنة</option></select><input id='t-c' placeholder='اللجنة (لرئيس اللجنة فقط)' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><button onclick='addTeam()' style='width:100%'>إضافة للتسيير</button></div>
+    <div id='t-list'></div>
     <h2>إضافة مشروع</h2>
     <div class='card'><input id='p-t' placeholder='اسم المشروع' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><input id='p-d' type='date' style='width:100%;padding:8px;border-radius:10px;border:1px solid #0002;font:inherit;background:var(--bg);color:var(--t);margin-bottom:8px;display:block'><button onclick='addProj()' style='width:100%'>إضافة المشروع</button></div>
     <h2>إضافة إنجاز</h2>
@@ -443,6 +448,28 @@ function removeMin(){SET.minImg='';persist();preview();}
 function prev2(){
   document.getElementById('set-prev2').innerHTML=SET.minImg?`<img src='${SET.minImg}' style='height:56px;object-fit:contain;background:#fff;border-radius:8px'>`:'';
 }
+const TEAM=[];
+const ROLE_GROUP={'مؤطر':'المؤطرون','مؤطر مساعد':'المؤطرون','رئيس النادي':'المكتب المسير','نائب الرئيس':'المكتب المسير','الكاتب العام':'المكتب المسير','أمين المال':'المكتب المسير','عضو مكتب':'المكتب المسير','رئيس لجنة':'رؤساء اللجان'};
+function addTeam(){
+  const n=document.getElementById('t-n').value.trim();
+  const r=document.getElementById('t-r').value;
+  const c=document.getElementById('t-c').value.trim();
+  if(!n) return;
+  TEAM.push({n,r,c});
+  document.getElementById('t-n').value=''; document.getElementById('t-c').value='';
+  renderTeam();
+}
+function removeTeam(i){TEAM.splice(i,1);renderTeam();}
+function renderTeam(){
+  const order=['المؤطرون','المكتب المسير','رؤساء اللجان'];
+  const html=order.map(g=>{
+    const ms=TEAM.filter(m=>ROLE_GROUP[m.r]===g);
+    if(!ms.length) return '';
+    return `<h3>${g}</h3>`+ms.map(m=>`<div class='card'><b>${m.n}</b><div class='tag'>${m.r}${m.c?' · لجنة '+m.c:''}</div></div>`).join('');
+  }).join('');
+  document.getElementById('h-team').innerHTML=html||"<div class='card tag'>لم تُضف أعضاء التسيير بعد</div>";
+  document.getElementById('t-list').innerHTML=TEAM.map((m,i)=>`<div class='card row'><span>${m.n} <span class='tag'>(${m.r})</span></span><button class='sm ghost' onclick='removeTeam(${i})'>حذف</button></div>`).join('');
+}
 function genMonthly(){
   const m=document.getElementById('mo-in').value;
   if(!m){document.getElementById('rp-out').innerHTML='<p>اختر الشهر أولاً.</p>';return;}
@@ -673,6 +700,7 @@ function switchRole(){
   if(S.role==='a') showOnly('a-dash'); else go(S.tab);
 }
 document.getElementById('mo-in').value=new Date().toISOString().slice(0,7);
+renderTeam();
 const ib=document.getElementById('i-idea').parentElement;
 document.getElementById('s-tasks').append(ib.previousElementSibling,ib,document.getElementById('s-ideas'));
 renderStudent();renderAdmin();go('home');fillReports();annual();renderIdeas();fillMembers();renderEq();document.getElementById('me-sec').value=PROF.sec;renderCard();
